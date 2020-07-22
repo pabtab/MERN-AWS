@@ -1,5 +1,3 @@
 exports.register = (req, res) => {
-  res.json({
-    data: 'You hit register pabtab'
-  })
+  console.log('Register controller', req.body)
 }

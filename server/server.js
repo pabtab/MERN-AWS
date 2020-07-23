@@ -9,6 +9,11 @@ require('dotenv').config() // For variables environments
 const app = express()
 const port = process.env.PORT || 8000;
 
+//db
+mongoose.connect(process.env.DATABASE_CLOUD, { useUnifiedTopology: true, useNewUrlParser: true })
+.then(() => console.log('Db connected'))
+.catch((err) => console.log(err));
+
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 //app.use(cors())

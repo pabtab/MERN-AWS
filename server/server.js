@@ -1,10 +1,11 @@
 const express = require('express')
-const authRoutes = require('./routes/auth')
 const morgan = require('morgan') // To development see the routes
 const bodyParser = require('body-parser') // To send body on req
 const cors = require('cors') // For development because the diffetent ports to comunicate
 const mongoose = require('mongoose') // Comunicate with mongo
 require('dotenv').config() // For variables environments
+
+const authRoutes = require('./routes/auth')
 
 const app = express()
 const port = process.env.PORT || 8000;

@@ -1,6 +1,9 @@
 const AWS = require("aws-sdk");
+const User = require("../models/user");
+const { registerEmailParams } = require("../helpers/email");
+const jwt = require("jsonwebtoken");
 
-// TODO: 
+// TODO:
 // Esta config puede removerse porque con solo llamar
 // la env variable con estos nombres AWS sdk las toma
 /* AWS.config.update({
@@ -13,35 +16,40 @@ const ses = new AWS.SES({ apiVersion: "2010-12-01" });
 
 exports.register = (req, res) => {
   const { name, email, password } = req.body;
-  const params = {
-    Source: process.env.EMAIL_FROM,
-    Destination: {
-      ToAddresses: [email],
-    },
-    ReplyToAddresses: [process.env.EMAIL_TO],
-    Message: {
-      Body: {
-        Html: {
-          Charset: "UTF-8",
-          Data: `<html><body><h1>Hello ${name}</h1><p style="color:red;">Test Email</p></body></html>`,
-        },
-      },
-      Subject: {
-        Charset: "UTF-8",
-        Data: "Complete your registration",
-      },
-    },
-  };
 
-  const sendEmailOnRegister = ses.sendEmail(params).promise();
+  // Check if user exist in databas
+  User.findOne({ email }).exec((err, user) => {
+    if (user) {
+      return res.status(400).json({
+        error: "Email taken",
+      });
+    }
 
-  sendEmailOnRegister
-    .then((data) => {
-      console.log("email submitted", data);
-      res.send('Email sent')
-    })
-    .catch((err) => {
-      console.log('ses email on register', err)
-      res.send('Email failed')
-    });
+    // Generate token with user email and pass
+    const token = jwt.sign(
+      { name, email, password },
+      process.env.JWT_ACCOUNT_ACTIVATION,
+      {
+        expiresIn: "10m",
+      }
+    );
+
+    const params = registerEmailParams(email, token);
+
+    const sendEmailOnRegister = ses.sendEmail(params).promise();
+
+    sendEmailOnRegister
+      .then((data) => {
+        console.log("email submitted", data);
+        res.json({
+          message: `Email has been sent to ${email}, Follow the instructions to complete your registration`,
+        });
+      })
+      .catch((err) => {
+        console.log("ses email on register", err);
+        res.json({
+          message: `We could not verify your email, please try again`,
+        });
+      });
+  });
 };

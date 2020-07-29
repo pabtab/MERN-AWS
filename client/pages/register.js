@@ -56,6 +56,7 @@ const Register = () => {
           className="form-control"
           placeholder="Type your name"
           value={name}
+          required
         />
       </div>
       <div className="form-group">
@@ -65,6 +66,7 @@ const Register = () => {
           className="form-control"
           placeholder="Type your email"
           value={email}
+          required
         />
       </div>
       <div className="form-group">
@@ -74,6 +76,7 @@ const Register = () => {
           className="form-control"
           placeholder="Type your password"
           value={password}
+          required
         />
       </div>
       <div className="form-group">

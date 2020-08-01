@@ -2,6 +2,7 @@ const AWS = require("aws-sdk");
 const User = require("../models/user");
 const { registerEmailParams } = require("../helpers/email");
 const jwt = require("jsonwebtoken");
+const shortid = require('shortid')
 
 // TODO:
 // Esta config puede removerse porque con solo llamar
@@ -53,3 +54,41 @@ exports.register = (req, res) => {
       });
   });
 };
+
+// Activate user after token
+exports.registerActivate = (req, res) => {
+  const { token } = req.body;
+  
+  jwt.verify(token, process.env.JWT_ACCOUNT_ACTIVATION, function(err, decoded) {
+    if (err) {
+      return res.status(401).json({
+        error: 'Expired link. Try again'
+      })
+    }
+
+    const { name, email, password } = jwt.decode(token)
+    const username = shortid.generate();
+
+    User.findOne({email}).exec((err, user) => {
+      if (user) {
+        return res.status(401).json({
+          error: 'Email is taken'
+        })
+      }
+    })
+
+    const newUser = new User({username, name, email, password})
+    newUser.save((err, result) => {
+      if (err) {
+        return res.status(401).json({
+          error: 'Error saving user in DB'
+        })
+      }
+
+      return res.json({
+        message: 'Registration success. Please Login'
+      })
+    })
+
+  })
+}

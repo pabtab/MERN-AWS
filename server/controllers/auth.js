@@ -92,3 +92,31 @@ exports.registerActivate = (req, res) => {
 
   })
 }
+
+
+exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findOne({email}).exec((err, user) => {
+    if (err || !user) {
+      return res.status(400).json({
+        error: 'User with that email doesnt exist. Please register'
+      })
+    }
+
+    // Authenticate with user scrhema
+    if (!user.authenticate(password)) {
+      return res.status(400).json({
+        error: 'Email and pass do not match'
+      }) 
+    }
+
+    const { _id, name, email, role } = user
+    const token = jwt.sign({ _id }, process.env.JWT_SECRET, {expiresIn: '7d'})
+
+    return res.json({
+      token,
+      user: { _id, name, email, role }
+    })
+  })
+}

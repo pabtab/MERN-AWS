@@ -4,6 +4,7 @@ import Router from 'next/router';
 import Layout from "../components/Layout";
 import axios from 'axios';
 import { showSuccessMessage, showErrorMessage } from "../helpers/alerts";
+import { authenticate, isAuth } from "../helpers/auth";
 
 const Login = () => {
   const [state, setState] = useState({
@@ -15,6 +16,10 @@ const Login = () => {
   });
 
   const { email, password, error, success, buttonText } = state
+
+  useEffect(() => {
+    isAuth() && Router.push('/')
+  }, [])
 
   const handleChange = (name) => (e) => {
     setState({
@@ -31,13 +36,15 @@ const Login = () => {
     setState({...state, buttonText: 'Logining in'})
 
     try {
-      const res = await axios.post(`${process.env.API}/login`, {
+      const response = await axios.post(`${process.env.API}/login`, {
         email,
         password
       })
-      console.log(res)
+
+      authenticate(response, () => Router.push('/'))
+      
     } catch (error) {
-      setState({...state, buttonText: 'Login', error: error.response.data.error})
+     setState({...state, buttonText: 'Login', error: error.response.data.error})
     }
   };
 
@@ -75,6 +82,7 @@ const Login = () => {
       {error && showErrorMessage(error)}
       <div className="col-md-6 offset-md-3">
         <h1>Login</h1>
+        {JSON.stringify(isAuth())}
         <br />
         {loginForm()}
         <hr />

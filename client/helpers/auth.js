@@ -32,7 +32,7 @@ export const setLocalStorage = (key, value) => {
 }
 
 // rRemove from localstorage
-export const setLocalStorage = (key) => {
+export const removeLocalStorage = (key) => {
   if (process.browser) {
     localStorage.removeItem(key)
   }
@@ -41,8 +41,8 @@ export const setLocalStorage = (key) => {
 // Atuherticate user by passing data to cookie and localstorage during signin
 export const authenticate = (response, next) => {
   setCookie('token', response.data.token);
-  setLocalStorage('user', response.data.user)
-  next()
+  setLocalStorage('user', response.data.user);
+  next();
 }
 
 // access user info from localstorage

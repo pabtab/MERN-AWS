@@ -41,7 +41,13 @@ const Login = () => {
         password
       })
 
-      authenticate(response, () => Router.push('/'))
+      authenticate(response, () => {
+        if (isAuth() && isAuth().role === 'admin') {
+          Router.push('/admin')
+        } else {
+          Router.push('/user')
+        }
+      })
       
     } catch (error) {
      setState({...state, buttonText: 'Login', error: error.response.data.error})

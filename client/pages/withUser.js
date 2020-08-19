@@ -23,14 +23,28 @@ const withUser = (Page) => {
       } catch (error) {
         if (error.response.status === 401) {
           return {
-            user: 'no-user'
+            user: null
           }
         }
       }
     }
-  }
 
-  return <WithAuthUser />
+    if (user === null) {
+      context.res.writeHead(302, {
+        Location: '/'
+      })
+      
+      context.res.end()
+    } else {
+      return {
+        ...(Page.getInitialProps ? await Page.getInitialProps(context) : {}),
+        user,
+        token
+      }
+    }
+  }
+  
+  return WithAuthUser
 }
 
 export default withUser

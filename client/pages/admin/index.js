@@ -1,12 +1,13 @@
 import React from 'react'
 import Layout from '../../components/Layout'
+import withAdmin from '../withAdmin'
 
-const Admin = () => {
+const Admin = ({user}) => {
   return (
     <Layout>
-      Admin page
+      {JSON.stringify(user)}
     </Layout>
   )
 }
 
-export default Admin
+export default withAdmin(Admin)

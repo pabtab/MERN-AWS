@@ -4,7 +4,7 @@ const expressJwt = require('express-jwt')
 const { registerEmailParams, forgotEmailParams } = require("../helpers/email");
 const jwt = require("jsonwebtoken");
 const shortid = require('shortid')
-
+const _ = require('lodash')
 // TODO:
 // Esta config puede removerse porque con solo llamar
 // la env variable con estos nombres AWS sdk las toma
@@ -206,5 +206,43 @@ exports.forgotPassord = (req, res) => {
 }
 
 exports.resetPassword = (req, res) => {
-  
+  const { resetPasswordLink, newPassword } = req.body
+
+  if (resetPasswordLink) {
+
+    // Check if expire 
+    jwt.verify(resetPasswordLink, process.env.JWT_RESET_PASSWORD, (err, success) => {
+      if (err) {
+        return res.status(400).json({
+          user: 'Expired Link '
+        })
+      }
+    })
+    User.findOne({resetPasswordLink }).exec((err, user) => {
+      if (err || !user) {
+        return res.status(400).json({
+          user: 'Invalid token. Please try again'
+        })
+      }
+
+      const  updatedFields = {
+        password: newPassword,
+        resetPasswordLink: ''
+      }
+
+      user = _.extend(user, updatedFields)
+
+      user.save((err, result) => {
+        if (err) {
+          return res.status(400).json({
+            user: 'Password reset failed Please try again'
+          })
+        }
+
+        res.json({
+          message: 'Great now you can login with the new password'
+        })
+      })
+    })
+  }
 }
